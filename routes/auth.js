@@ -1,38 +1,33 @@
-// auth.js (server-side route handling)
 import express from 'express';
-import User from '../models/user.js';
+import jwt from 'jsonwebtoken';
+import User from '../models/user.js';  // Assuming User model is in this location
 
 const router = express.Router();
-
-// Register route
-router.post('/register', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = new User({ email, password });
-        await user.save();
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-        res.status(400).json({ error: 'Error registering user' });
-    }
-});
 
 // Login route
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ error: 'User not found' });
+    try {
+        const user = await User.findOne({ email });  // Find user by email
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+        if (!user) {
+            return res.status(400).json({ error: 'User not found' });  // If user not found, return error
+        }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ token });
+        const isMatch = await user.comparePassword(password);  // Assuming comparePassword method in user model
+
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Invalid credentials' });  // Invalid password
+        }
+
+        // Generate JWT token with expiration time (e.g., 24 hours)
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+        res.status(200).json({ token });  // Send the token to the frontend
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error during login' });  // Catch and handle errors
+    }
 });
 
 export default router;
-
-
-   
-
-
-

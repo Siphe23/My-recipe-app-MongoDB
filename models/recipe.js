@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const recipeSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    ingredients: { type: [String], required: true },
-    instructions: { type: String, required: true },
-    image: { type: String },
-    createdAt: { type: Date, default: Date.now() },
+  name: { type: String, required: true },
+  ingredients: { type: [String], required: true },
+  instructions: { type: String, required: true },
+  image: { type: String }, // Optionally store the image URL or base64 data
 });
 
-export default mongoose.model("Recipe", recipeSchema);
+const Recipe = mongoose.model('Recipe', recipeSchema);
+export default Recipe;
